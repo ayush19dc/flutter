@@ -11,7 +11,6 @@ FirebaseAuth.instance
       print('User is signed in!');
     }
   });
-// Disable persistence on web platforms
 await FirebaseAuth.instance.setPersistence(Persistence.NONE);
 UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
 try {
@@ -46,15 +45,11 @@ if (!user.emailVerified) {
   await user.sendEmailVerification();
 }
 FirebaseAuth auth = FirebaseAuth.instance;
-
-// Get the code from the email:
 String code = 'xxxxxxx';
 
 try {
   await auth.checkActionCode(code);
   await auth.applyActionCode(code);
-
-  // If successful, reload the user:
   auth.currentUser.reload();
 } on FirebaseAuthException catch (e) {
   if (e.code == 'invalid-action-code') {
@@ -62,16 +57,11 @@ try {
   }
 }
 var acs = ActionCodeSettings(
-    // URL you want to redirect back to. The domain (www.example.com) for this
-    // URL must be whitelisted in the Firebase Console.
     url: "https://www.example.com/finishSignUp?cartId=1234",
-    // This must be true
     handleCodeInApp: true,
     iOSBundleId: "com.example.ios",
     androidPackageName: "com.example.android",
-    // installIfNotAvailable
     androidInstallApp: true,      
-    // minimumVersion
     androidMinimumVersion: "12"); 
 var emailAuth = "someemail@domain.com";
 FirebaseAuth.instance.sendSignInLinkToEmail(
@@ -80,20 +70,12 @@ FirebaseAuth.instance.sendSignInLinkToEmail(
     .then((value) => print('Successfully sent email verification'));
 });
 var auth = FirebaseAuth.instance;
-// Retrieve the email from wherever you stored it
 var emailAuth = "someemail@domain.com";
-// Confirm the link is a sign-in with email link.
 if (auth.isSignInWithEmailLink(emailLink)) {
-  // The client SDK will parse the code from the link for you.
   auth.signInWithEmailLink(email: emailAuth, emailLink: emailLink)
     .catchError(
       (onError) => print('Error signing in with email link $onError'))
     .then((value) {
-    // You can access the new user via value.user
-    // Additional user info profile *not* available via:
-    // value.additionalUserInfo.profile == null
-    // You can check if the user is new or existing:
-    // value.additionalUserInfo.isNewUser;
     var userEmail = value.user;
     print('Successfully signed in with email link!');
   });
