@@ -1,0 +1,101 @@
+import 'package:firebase_auth/firebase_auth.dart';
+FirebaseAuth auth = FirebaseAuth.instance;
+FirebaseApp secondaryApp = Firebase.app('SecondaryApp');
+FirebaseAuth auth = FirebaseAuth.instanceFor(app: secondaryApp);
+FirebaseAuth.instance
+  .authStateChanges()
+  .listen((User user) {
+    if (user == null) {
+      print('User is currently signed out!');
+    } else {
+      print('User is signed in!');
+    }
+  });
+// Disable persistence on web platforms
+await FirebaseAuth.instance.setPersistence(Persistence.NONE);
+UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
+try {
+  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: "barry.allen@example.com",
+    password: "SuperSecretPassword!"
+  );
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'weak-password') {
+    print('The password provided is too weak.');
+  } else if (e.code == 'email-already-in-use') {
+    print('The account already exists for that email.');
+  }
+} catch (e) {
+  print(e);
+}
+try {
+  UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: "barry.allen@example.com",
+    password: "SuperSecretPassword!"
+  );
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'user-not-found') {
+    print('No user found for that email.');
+  } else if (e.code == 'wrong-password') {
+    print('Wrong password provided for that user.');
+  }
+}
+User user = FirebaseAuth.instance.currentUser;
+
+if (!user.emailVerified) {
+  await user.sendEmailVerification();
+}
+FirebaseAuth auth = FirebaseAuth.instance;
+
+// Get the code from the email:
+String code = 'xxxxxxx';
+
+try {
+  await auth.checkActionCode(code);
+  await auth.applyActionCode(code);
+
+  // If successful, reload the user:
+  auth.currentUser.reload();
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'invalid-action-code') {
+    print('The code is invalid.');
+  }
+}
+var acs = ActionCodeSettings(
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be whitelisted in the Firebase Console.
+    url: "https://www.example.com/finishSignUp?cartId=1234",
+    // This must be true
+    handleCodeInApp: true,
+    iOSBundleId: "com.example.ios",
+    androidPackageName: "com.example.android",
+    // installIfNotAvailable
+    androidInstallApp: true,      
+    // minimumVersion
+    androidMinimumVersion: "12"); 
+var emailAuth = "someemail@domain.com";
+FirebaseAuth.instance.sendSignInLinkToEmail(
+        email: emailAuth, actionCodeSettings: acs)
+    .catchError((onError) => print('Error sending email verification $onError'))
+    .then((value) => print('Successfully sent email verification'));
+});
+var auth = FirebaseAuth.instance;
+// Retrieve the email from wherever you stored it
+var emailAuth = "someemail@domain.com";
+// Confirm the link is a sign-in with email link.
+if (auth.isSignInWithEmailLink(emailLink)) {
+  // The client SDK will parse the code from the link for you.
+  auth.signInWithEmailLink(email: emailAuth, emailLink: emailLink)
+    .catchError(
+      (onError) => print('Error signing in with email link $onError'))
+    .then((value) {
+    // You can access the new user via value.user
+    // Additional user info profile *not* available via:
+    // value.additionalUserInfo.profile == null
+    // You can check if the user is new or existing:
+    // value.additionalUserInfo.isNewUser;
+    var userEmail = value.user;
+    print('Successfully signed in with email link!');
+  });
+}
+await FirebaseAuth.instance.signOut();
