@@ -19,13 +19,11 @@ class _CameraScreenState extends State {
 @override
 void initState() {
   super.initState();
-  // 1
   availableCameras().then((availableCameras) {
     
     cameras = availableCameras;
     if (cameras.length > 0) {
       setState(() {
-        // 2
         selectedCameraIdx = 0;
       });
 
@@ -34,7 +32,6 @@ void initState() {
       print("No camera available");
     }
   }).catchError((err) {
-    // 3
     print('Error: $err.code\nError Message: $err.message');
   });
 }
@@ -42,14 +39,10 @@ Future _initCameraController(CameraDescription cameraDescription) async {
   if (controller != null) {
     await controller.dispose();
   }
-
-  // 3
   controller = CameraController(cameraDescription, ResolutionPreset.high);
 
   // If the controller is updated then update the UI.
-  // 4
   controller.addListener(() {
-    // 5
     if (mounted) {
       setState(() {});
     }
@@ -114,14 +107,11 @@ void _onSwitchCamera() {
 }
 void _onCapturePressed(context) async {
   try {
-    // 1
     final path = join(
       (await getTemporaryDirectory()).path,
       '${DateTime.now()}.png',
     );
-    // 2
     await controller.takePicture(path);
-    // 3
     Navigator.push(
       context,
       MaterialPageRoute(
